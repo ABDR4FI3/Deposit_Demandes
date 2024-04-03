@@ -1,5 +1,7 @@
 package org.example.springpfa.Controller;
 import org.example.springpfa.Repository.DemandeRepository;
+import org.example.springpfa.Repository.UserRepository;
+import org.example.springpfa.Services.JWTUtils;
 import org.example.springpfa.Services.UserService;
 import org.example.springpfa.entities.Demande;
 import org.example.springpfa.entities.User;
@@ -14,12 +16,22 @@ public class DemandeController {
 
     @Autowired
     DemandeRepository demandeRepository;
-
-    @GetMapping("/demandes")
-    public List<Demande> GetUsers(){
-        List<Demande> arrayList = new ArrayList<>();
-        arrayList =  demandeRepository.findAll();
-        return  arrayList;
+    @Autowired
+    JWTUtils jwtUtils;
+    @Autowired
+    UserRepository userRepository;
+    @PostMapping("/demandes")
+    public List<Demande> GetDemandes(@RequestBody String token ) {
+        System.out.println(token);
+        User user = userRepository.findByUsername(jwtUtils.extractUserName(token));
+        // Check if token is valid for the given user
+        if (!jwtUtils.isTokenValid(token, user)) {
+            throw new RuntimeException("Invalid or expired token");
+        }
+        // Fetch and return demandes from repository
+        List<Demande> demandes = demandeRepository.findAll();
+        System.out.println(token + "\n" + user.getUsername());
+        return demandes;
     }
     //Get a specific user
     @GetMapping("/demandes/{id}")

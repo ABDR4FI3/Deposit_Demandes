@@ -1,6 +1,7 @@
 package org.example.springpfa.Controller;
 
 import org.example.springpfa.Repository.UserRepository;
+import org.example.springpfa.Services.JWTUtils;
 import org.example.springpfa.Services.PasswordEncoderService;
 import org.example.springpfa.Services.UserService;
 import org.example.springpfa.entities.User;
@@ -19,9 +20,8 @@ public class UserController {
     UserRepository userRepository;
     @Autowired
     UserService userService ;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
-    PasswordEncoderService passwordEncoder;
+    JWTUtils jwtUtils;
 
 
 
@@ -51,21 +51,19 @@ public class UserController {
         userService.dropUser(id);
     }
 
-    //authentication
+    // Authentication
     @PostMapping("/users/authenticate")
     public Map<String, String> authenticateUser(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
-        System.out.println(email);
         // Retrieve user from database
         User user = userRepository.findByEmail(email);
         if (user != null && password.equals(user.getPassword())) {
             // Generate JWT token
-            String token = passwordEncoder.generateToken(user);
+            String token = jwtUtils.generateToken(user);
             // Return the token to the client
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
-            System.out.println("Connected Successfully \n"+ token);
             return response;
         } else {
             throw new RuntimeException("Invalid credentials");

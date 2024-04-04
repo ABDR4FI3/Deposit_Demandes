@@ -19,7 +19,7 @@ import java.util.function.Function;
 @Component
 public class JWTUtils {
     private SecretKey secretKey;
-    private static final long ExpirationTime = 3_600_000 ; // how many milliseconds in 1 hour
+    private static final long ExpirationTime =  50_000 ; // 3_600_000 milliseconds in 1 hour #to test use 5_000
 
     public JWTUtils(){
         // Hardcoded secret string (should be kept secure and not hardcoded in real-world scenarios)
@@ -39,7 +39,8 @@ public class JWTUtils {
                 // Set the subject of the token to the username of the user
                 .setSubject(user.getUsername())
                 // Set the issued date of the token to the current time plus the expiration time
-                .setIssuedAt(new Date(System.currentTimeMillis() + ExpirationTime))
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + ExpirationTime))
                 // Sign the token with the secret key specified in the JWTUtils class
                 .signWith(secretKey)
                 // Generate the compact serialized form of the JWT token
@@ -60,8 +61,28 @@ public class JWTUtils {
     }
     //
     private <T> T extractClaims(String token, Function<Claims,T> claimsTFunction){
-        return claimsTFunction.apply(Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody());
+        Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+        if (claims == null) {
+            throw new IllegalArgumentException("Claims cannot be null");
+        }
+        return claimsTFunction.apply(claims);
     }
+
+    public Date extractExpiration(String token) {
+        Date claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getIssuedAt();
+        System.out.println("claims.getExpiration()");
+        System.out.println(claims);
+        Date dateExpiration = new Date(claims.getTime()+ExpirationTime);
+
+        return dateExpiration;
+        //return claims.getExpiration();
+    }
+
     public boolean isTokenValid(String token, User user){
         final String userName = extractUserName(token);
         System.out.println(userName);
@@ -70,8 +91,9 @@ public class JWTUtils {
     }
 
     public  boolean isTokenExpired(String token){
+        return extractExpiration(token).before(new Date());
         //return extractClaims(token,Claims::getExpiration).before(new Date());
-        return false;
+        //return false;
     }
 
 

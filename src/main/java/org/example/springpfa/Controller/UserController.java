@@ -64,6 +64,8 @@ public class UserController {
             // Return the token to the client
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
+            String role = userRepository.findRoleIdByUsername(user.getUsername());
+            response.put("role",role);
             return response;
         } else {
             throw new RuntimeException("Invalid credentials");

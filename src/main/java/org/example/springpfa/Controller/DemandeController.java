@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 public class DemandeController {
@@ -43,15 +44,32 @@ public class DemandeController {
     }
     //add new User
     @PostMapping("/demandes/add")
-    public void PostUser(@RequestBody Demande demande){
-        /*Demande demande1 = demande;
+    public int PostUser(@RequestBody Demande demande , @RequestParam String token){
+
+        System.out.println(token);
         String userName = jwtUtils.extractUserName(token);
+        System.out.println(userName);
         User user = userRepository.findByUsername(userName);
-        demande1.setUser(user);
+        System.out.println(user.getUsername());
+        System.out.println(user.getUserRole());
+        System.out.println(user.getId());
+        System.out.println(user.getEmail());
+        System.out.println(user.getTel());
+        user.setDemandes(null);
         System.out.println(user);
-        System.out.println(demande1);*/
-        //demandeRepository.save(demande);
-        return;
+        System.out.println();
+        Demande demande1 = new Demande();
+        demande1.setUser(user);
+        demande1.setIdDemande(null);
+        demande1.setSujet(demande.getSujet());
+        demande1.setDate(demande.getDate());
+        demande1.setEtat("pending");
+        demande1.setTitle(demande.getTitle());
+
+        System.out.println("user");
+        System.out.println(demande1);
+        demandeRepository.save(demande1);
+        return 1;
     }
 
 

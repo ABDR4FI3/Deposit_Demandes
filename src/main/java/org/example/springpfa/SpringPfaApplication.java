@@ -41,7 +41,6 @@ public class SpringPfaApplication implements CommandLineRunner {
         demandeRepository.save(demande);
         userRepository.save(user);
         userRoleRepository.save(userRole);
-
          */
     }
 }

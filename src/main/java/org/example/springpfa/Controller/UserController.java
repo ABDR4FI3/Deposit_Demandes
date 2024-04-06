@@ -1,6 +1,7 @@
 package org.example.springpfa.Controller;
 
 import org.example.springpfa.Repository.UserRepository;
+import org.example.springpfa.Repository.UserRoleRepository;
 import org.example.springpfa.Services.JWTUtils;
 import org.example.springpfa.Services.PasswordEncoderService;
 import org.example.springpfa.Services.UserService;
@@ -18,6 +19,8 @@ import java.util.Map;
 public class UserController {
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    UserRoleRepository userRoleRepository;
     @Autowired
     UserService userService ;
     @Autowired
@@ -38,8 +41,27 @@ public class UserController {
     }
     //add new User
     @PostMapping("/user/add")
-    public void PostUser(@RequestBody User user){
-        userService.addUser(user);
+    public Map<String,String> PostUser(@RequestBody User user ){
+        Map<String,String> response = new HashMap<>();
+
+        System.out.println(user);
+
+        if(userRepository.findByUsername(user.getUsername()) == null){
+            // we didn't find any user with this username
+            System.out.println("user Not found");
+            user.setUserRole(userRoleRepository.findById(1));
+            userService.addUser(user);
+            String token = jwtUtils.generateToken(user);
+            response.put("role","user");
+            response.put("response","200");
+            response.put("token",token);
+
+        }else{
+            System.out.println("User Found");
+            response.put("response","400");// is my indicator that the username is being used
+        }
+
+        return response;
     }
     //Edit an existing user :
     @PutMapping("/user/edit/{id}")

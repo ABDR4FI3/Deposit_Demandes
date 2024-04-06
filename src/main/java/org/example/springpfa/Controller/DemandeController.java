@@ -82,7 +82,6 @@ public class DemandeController {
     public void DeleteUser(@PathVariable long id){
         userService.dropUser(id);
     }
-
      */
 
     @GetMapping("/checkToken")
@@ -105,4 +104,25 @@ public class DemandeController {
     }
 
 
+    @PostMapping("/reclamation/solve")
+    public int solveReclamation(@RequestBody String token ,@RequestParam Long id ){
+        String userName = jwtUtils.extractUserName(token);
+        User user = userRepository.findByUsername(userName);
+        Demande demande = demandeRepository.findByIdDemande(id);
+        demande.setEtat("Solved");
+        demandeRepository.save(demande);
+        System.out.println(user);
+        return 1;
+    }
+
+    @PostMapping("/reclamation/reject")
+    public int rejectReclamation(@RequestBody String token ,@RequestParam Long id){
+        String userName = jwtUtils.extractUserName(token);
+        User user = userRepository.findByUsername(userName);
+        Demande demande = demandeRepository.findByIdDemande(id);
+        demande.setEtat("Rejected");
+        demandeRepository.save(demande);
+        System.out.println(user);
+        return 1;
+    }
 }
